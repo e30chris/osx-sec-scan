@@ -73,6 +73,17 @@ func homeApps() []string {
 
 func checkApp(e *Env, app string) {
 	v := runner.Run(10*time.Minute, "/usr/bin/codesign", "--verify", "--deep", "--strict", app)
+	if v.ExitCode != 0 && strings.Contains(v.Combined(), "detritus not allowed") &&
+		runner.Run(10*time.Minute, "/usr/bin/codesign", "--verify", "--deep", app).ExitCode == 0 {
+		// Code is intact; only Finder metadata xattrs (common in Chromium helpers) trip --strict.
+		e.Report.Add(report.Finding{
+			Severity: report.Low, Check: "codesign",
+			Title:  "Extra Finder metadata inside " + filepath.Base(app) + " (code intact)",
+			Detail: app + "\n" + strings.TrimSpace(v.Combined()),
+			Key:    "detritus:" + app,
+		})
+		return
+	}
 	if v.ExitCode != 0 {
 		e.Report.Add(report.Finding{
 			Severity: report.Medium, Check: "codesign",
@@ -156,9 +167,15 @@ func ClamAV(e *Env) (string, string) {
 	if err := os.MkdirAll(dbDir, 0o755); err != nil {
 		return failed(err)
 	}
+	// ClamAV 1.5+ verifies signature DBs against the CA cert shipped with the
+	// install (<prefix>/etc/clamav/certs); a custom config must point at it.
+	certs, _ := filepath.EvalSymlinks(filepath.Join(filepath.Dir(clamscan), "..", "etc", "clamav", "certs"))
+	if certs == "" {
+		return "error", "ClamAV CA cert dir not found next to " + clamscan
+	}
 	conf := filepath.Join(e.StateDir, "freshclam.conf")
-	confBody := fmt.Sprintf("DatabaseDirectory %s\nDatabaseMirror database.clamav.net\nDatabaseOwner %s\nUpdateLogFile %s\n",
-		dbDir, dbOwner(), filepath.Join(e.StateDir, "freshclam.log"))
+	confBody := fmt.Sprintf("DatabaseDirectory %s\nDatabaseMirror database.clamav.net\nDatabaseOwner %s\nUpdateLogFile %s\nCVDCertsDirectory %s\n",
+		dbDir, dbOwner(), filepath.Join(e.StateDir, "freshclam.log"), certs)
 	if err := os.WriteFile(conf, []byte(confBody), 0o644); err != nil {
 		return failed(err)
 	}
@@ -174,7 +191,7 @@ func ClamAV(e *Env) (string, string) {
 	}
 
 	logFile := filepath.Join(e.Report.Dir, "clamscan.log")
-	args := []string{"--database=" + dbDir, "-r", "-i", "--cross-fs=no",
+	args := []string{"--database=" + dbDir, "--cvdcertsdir=" + certs, "-r", "-i", "--cross-fs=no",
 		"--max-filesize=200M", "--max-scansize=400M", "--log=" + logFile}
 	for _, x := range e.Config.ExcludeDirs {
 		args = append(args, "--exclude-dir="+x)
