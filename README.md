@@ -26,6 +26,8 @@ Always-on protection between scans: LuLu, BlockBlock, ReiKey, OverSight (see `Br
 brew bundle --file Brewfile
 ```
 
+Install ClamAV from the official Cisco-Talos package, not Homebrew. See [docs/clamav.md](docs/clamav.md).
+
 ```bash
 go build -o bin/osxscan ./cmd/osxscan
 ```

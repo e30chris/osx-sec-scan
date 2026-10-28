@@ -2,7 +2,7 @@
 
 ## 1. First clean-up pass
 
-1. `brew bundle --file Brewfile` and `go build -o bin/osxscan ./cmd/osxscan`
+1. `brew bundle --file Brewfile`, install ClamAV per [clamav.md](clamav.md), and `go build -o bin/osxscan ./cmd/osxscan`
 2. Give your terminal app Full Disk Access (README > Full Disk Access).
 3. `sudo ./bin/osxscan full`. This takes 1–3 hours and keeps the Mac awake (`caffeinate -i sudo ./bin/osxscan full`).
 4. Read `results/<latest>/summary.md` from the top. For each finding:

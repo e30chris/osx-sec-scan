@@ -1,5 +1,6 @@
 # Scanners (CLI)
-brew "clamav"   # GPL-2.0  - signature malware scanner
+# ClamAV: install the official Cisco-Talos .pkg instead (docs/clamav.md).
+# Homebrew's build links OpenSSL 4 and cannot verify signature DBs.
 brew "yara"     # BSD-3    - pattern matching for malware families
 brew "lynis"    # GPL-3.0  - host security audit
 cask "osquery"  # Apache-2.0 / GPL-2.0 - SQL over OS state

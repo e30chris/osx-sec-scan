@@ -155,11 +155,35 @@ func Lynis(e *Env) (string, string) {
 	return ok("hardening index %s, %d warnings", index, len(warnings))
 }
 
+// clamavPkgBin is where the official Cisco-Talos macOS .pkg installs. It is
+// preferred over Homebrew, whose OpenSSL 4 build cannot verify signature DBs
+// (Cisco-Talos/clamav#1873). See docs/clamav.md.
+const clamavPkgBin = "/usr/local/clamav/bin"
+
+func clamTool(name string) string {
+	if p := runner.Find(filepath.Join(clamavPkgBin, name)); p != "" {
+		return p
+	}
+	return runner.Find(name)
+}
+
+// clamCerts finds the CA cert dir shipped with the install: etc/certs for the
+// official pkg, etc/clamav/certs for Homebrew.
+func clamCerts(clamscan string) string {
+	prefix := filepath.Join(filepath.Dir(clamscan), "..")
+	for _, rel := range []string{"etc/certs", "etc/clamav/certs"} {
+		if p, err := filepath.EvalSymlinks(filepath.Join(prefix, rel)); err == nil {
+			return p
+		}
+	}
+	return ""
+}
+
 // ClamAV updates signatures into state/clamav (repo-local, gitignored) and scans ScanPaths.
 func ClamAV(e *Env) (string, string) {
-	clamscan, freshclam := runner.Find("clamscan"), runner.Find("freshclam")
+	clamscan, freshclam := clamTool("clamscan"), clamTool("freshclam")
 	if clamscan == "" || freshclam == "" {
-		return skipped("clamav not installed (brew bundle)")
+		return skipped("clamav not installed (see docs/clamav.md)")
 	}
 	e.Report.Version("clamav", runner.Run(10*time.Second, clamscan, "--version").Combined())
 
@@ -168,8 +192,8 @@ func ClamAV(e *Env) (string, string) {
 		return failed(err)
 	}
 	// ClamAV 1.5+ verifies signature DBs against the CA cert shipped with the
-	// install (<prefix>/etc/clamav/certs); a custom config must point at it.
-	certs, _ := filepath.EvalSymlinks(filepath.Join(filepath.Dir(clamscan), "..", "etc", "clamav", "certs"))
+	// install; a custom config must point at it.
+	certs := clamCerts(clamscan)
 	if certs == "" {
 		return "error", "ClamAV CA cert dir not found next to " + clamscan
 	}
