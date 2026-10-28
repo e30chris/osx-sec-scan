@@ -1,0 +1,5 @@
+# Scan output and machine-local state. Never commit these.
+/results/
+/state/
+/bin/
+/config/local.json

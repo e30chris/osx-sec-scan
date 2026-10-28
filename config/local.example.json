@@ -1,0 +1,20 @@
+{
+  "scan_paths": [
+    "/Users",
+    "/Applications",
+    "/Library",
+    "/private/tmp",
+    "/private/var/tmp",
+    "/usr/local",
+    "/opt"
+  ],
+  "exclude_dirs": [
+    "^/Users/[^/]+/Library/Containers/com\\.docker\\.docker/Data",
+    "^/Users/[^/]+/\\.Trash",
+    "/\\.git/objects",
+    "/node_modules/\\.cache"
+  ],
+  "yara_rules": "",
+  "allowlist": [],
+  "keyboard_tap_allowlist": []
+}
