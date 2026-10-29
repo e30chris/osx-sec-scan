@@ -97,6 +97,9 @@ func (e *Env) scanList(out string) (int, error) {
 	n := 0
 	for _, root := range e.Config.ScanPaths {
 		_ = filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
+			if runner.Interrupted() {
+				return filepath.SkipAll
+			}
 			if err != nil {
 				return nil // unreadable: skip, keep walking
 			}

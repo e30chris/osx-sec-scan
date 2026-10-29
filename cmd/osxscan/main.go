@@ -3,10 +3,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 	"time"
 
 	"github.com/e30chris/osx-sec-scan/internal/checks"
@@ -127,6 +130,20 @@ func scan(repo, mode string, notify bool) int {
 		fmt.Fprintln(os.Stderr, "note: not running as root; some checks will be partial")
 	}
 
+	// First Ctrl-C stops the current tool (and clamd) and still writes a
+	// partial report, handed back to you; a second Ctrl-C quits immediately.
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
+	go func() {
+		<-sigs
+		fmt.Fprintln(os.Stderr, "\ninterrupted: stopping and writing a partial report (Ctrl-C again to quit now)")
+		signal.Reset(os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
+		cancel()
+	}()
+	runner.SetContext(ctx)
+
 	list := checks.Quick()
 	if mode == "full" {
 		list = checks.Full()
@@ -145,6 +162,9 @@ func scan(repo, mode string, notify bool) int {
 		msg := fmt.Sprintf("%d high, %d medium findings. See results/%s", c[report.High], c[report.Medium], filepath.Base(rep.Dir))
 		runner.Run(10*time.Second, "/usr/bin/osascript", "-e",
 			fmt.Sprintf("display notification %q with title %q", msg, "osxscan "+mode))
+	}
+	if runner.Interrupted() {
+		return 130
 	}
 	if c[report.High] > 0 {
 		return 3

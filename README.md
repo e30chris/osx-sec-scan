@@ -36,8 +36,15 @@ Then open LuLu, BlockBlock Helper, ReiKey and OverSight once each and approve
 their system extensions and permissions.
 
 By default, ClamAV and YARA skip cloud-only folders (Dropbox/iCloud: reading
-them forces downloads), `~/Movies`, rebuildable caches and Linux container
-disks. See `exclude_dirs` in `internal/config/config.go`.
+them forces downloads), `~/Movies`, rebuildable caches and VM/container
+disks (Docker, OrbStack, UTM, Claude). See `exclude_dirs` in
+`internal/config/config.go`.
+
+The default scope is every home folder. That's thorough but slow, since it
+reads all your code and documents. To speed it up, set `scan_paths` in
+`config/local.json` to where malware actually lands or persists: `~/Downloads`,
+`~/Desktop`, `~/Library`, `~/.local`, `~/.config`, `/Users/Shared`,
+`/Applications`, `/Library`, the temp folders, `/usr/local` and `/opt`.
 
 Optional: `cp config/local.example.json config/local.json` and edit. That file
 is gitignored. Use it for allowlists of findings you've reviewed.

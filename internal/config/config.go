@@ -47,6 +47,8 @@ func Default() Config {
 			`^/Users/[^/]+/\.orbstack(/|$)`,
 			`^/Users/[^/]+/Library/Group Containers/HUAQ24HBR6\.dev\.orbstack(/|$)`,
 			`^/Users/[^/]+/Library/Containers/com\.docker\.docker/Data(/|$)`,
+			`^/Users/[^/]+/Library/Containers/com\.utmapp\.UTM(/|$)`,
+			`^/Users/[^/]+/Library/Application Support/Claude/vm_bundles(/|$)`,
 			`^/Users/[^/]+/\.Trash(/|$)`,
 			`/\.git/objects(/|$)`,
 		},

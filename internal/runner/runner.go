@@ -52,9 +52,18 @@ func Find(name string) string {
 	return ""
 }
 
-// Run executes name with args, killing it after timeout.
+// base is the parent of every Run; cancelling it (Ctrl-C) kills the running tool.
+var base = context.Background()
+
+// SetContext makes every later Run stop when ctx is cancelled.
+func SetContext(ctx context.Context) { base = ctx }
+
+// Interrupted reports whether the run was cancelled (e.g. by Ctrl-C).
+func Interrupted() bool { return base.Err() != nil }
+
+// Run executes name with args, killing it after timeout or on interrupt.
 func Run(timeout time.Duration, name string, args ...string) Result {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(base, timeout)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, name, args...)
@@ -73,7 +82,7 @@ func Run(timeout time.Duration, name string, args ...string) Result {
 		res.Err = err
 		res.ExitCode = -1
 	}
-	if ctx.Err() == context.DeadlineExceeded {
+	if ctx.Err() != nil {
 		res.Err = ctx.Err()
 	}
 	return res

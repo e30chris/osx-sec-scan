@@ -10,6 +10,7 @@ import (
 
 	"github.com/e30chris/osx-sec-scan/internal/config"
 	"github.com/e30chris/osx-sec-scan/internal/report"
+	"github.com/e30chris/osx-sec-scan/internal/runner"
 )
 
 // Env is shared state for one run.
@@ -52,9 +53,16 @@ func Full() []Check {
 // RunAll executes checks in order, printing progress to stderr.
 func RunAll(e *Env, list []Check) {
 	for _, c := range list {
+		if runner.Interrupted() {
+			e.Report.Status(report.CheckStatus{Name: c.Name, Status: "skipped", Note: "interrupted"})
+			continue
+		}
 		fmt.Fprintf(os.Stderr, "==> %s\n", c.Name)
 		start := time.Now()
 		status, note := safeRun(e, c)
+		if runner.Interrupted() {
+			status, note = "interrupted", "partial: "+note
+		}
 		d := time.Since(start)
 		e.Report.Status(report.CheckStatus{Name: c.Name, Status: status, Note: note, Duration: d})
 		fmt.Fprintf(os.Stderr, "    %s (%s) %s\n", status, d.Round(time.Second), note)
