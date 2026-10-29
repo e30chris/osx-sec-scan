@@ -4,7 +4,7 @@
 
 1. `brew bundle --file Brewfile`, install ClamAV per [clamav.md](clamav.md), and `go build -o bin/osxscan ./cmd/osxscan`
 2. Give your terminal app Full Disk Access (README > Full Disk Access).
-3. `sudo ./bin/osxscan full`. This takes 1–3 hours and keeps the Mac awake (`caffeinate -i sudo ./bin/osxscan full`).
+3. `sudo ./bin/osxscan full` (use **sudo**). ClamAV runs a temporary multi-threaded clamd, so expect roughly 1–3 hours for a few hundred GB. Keep the Mac awake (`caffeinate -i`, or an app like Caffeine).
 4. Read `results/<latest>/summary.md` from the top. For each finding:
    - **Recognize it and want it** → add its key to the allowlist.
    - **Recognize it, don't need it** → uninstall the app properly, then remove leftovers.

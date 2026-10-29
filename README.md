@@ -15,7 +15,7 @@ between runs. Results stay on the machine in `results/` (gitignored).
 | quick | knockknock | KnockKnock | Second opinion on persistence (VirusTotal disabled) |
 | full | codesign | `codesign`/`spctl` | Every app bundle's signature and Gatekeeper verdict |
 | full | lynis | Lynis | General host audit |
-| full | clamav | ClamAV | Known-malware signatures across user-writable areas |
+| full | clamav | ClamAV (clamd, all cores) | Known-malware signatures across user-writable areas |
 | full | yara | YARA | Malware-family rules (bring your own, see [docs/yara-rules.md](docs/yara-rules.md)) |
 
 Always-on protection between scans: LuLu, BlockBlock, ReiKey, OverSight (see `Brewfile`).
@@ -34,6 +34,10 @@ go build -o bin/osxscan ./cmd/osxscan
 
 Then open LuLu, BlockBlock Helper, ReiKey and OverSight once each and approve
 their system extensions and permissions.
+
+By default, ClamAV and YARA skip cloud-only folders (Dropbox/iCloud: reading
+them forces downloads), `~/Movies`, rebuildable caches and Linux container
+disks. See `exclude_dirs` in `internal/config/config.go`.
 
 Optional: `cp config/local.example.json config/local.json` and edit. That file
 is gitignored. Use it for allowlists of findings you've reviewed.

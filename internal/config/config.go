@@ -33,10 +33,22 @@ func Default() Config {
 			"/opt",
 		},
 		ExcludeDirs: []string{
-			`^/Users/[^/]+/Library/Containers/com\.docker\.docker/Data`,
-			`^/Users/[^/]+/\.Trash`,
-			`/\.git/objects`,
-			`/node_modules/\.cache`,
+			// Cloud-only files: reading them makes macOS download them.
+			`^/Users/[^/]+/Library/CloudStorage(/|$)`,
+			`^/Users/[^/]+/Library/Mobile Documents(/|$)`,
+			// Large media; files over 200 MB are skipped anyway.
+			`^/Users/[^/]+/Movies(/|$)`,
+			// Caches that apps rebuild.
+			`^/Users/[^/]+/Library/Caches(/|$)`,
+			`^/Users/[^/]+/go/pkg/mod(/|$)`,
+			`/node_modules/\.cache(/|$)`,
+			// Linux VM / container disks, not macOS code.
+			`^/Users/[^/]+/\.local/share/containers(/|$)`,
+			`^/Users/[^/]+/\.orbstack(/|$)`,
+			`^/Users/[^/]+/Library/Group Containers/HUAQ24HBR6\.dev\.orbstack(/|$)`,
+			`^/Users/[^/]+/Library/Containers/com\.docker\.docker/Data(/|$)`,
+			`^/Users/[^/]+/\.Trash(/|$)`,
+			`/\.git/objects(/|$)`,
 		},
 	}
 }

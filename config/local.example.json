@@ -9,10 +9,18 @@
     "/opt"
   ],
   "exclude_dirs": [
-    "^/Users/[^/]+/Library/Containers/com\\.docker\\.docker/Data",
-    "^/Users/[^/]+/\\.Trash",
-    "/\\.git/objects",
-    "/node_modules/\\.cache"
+    "^/Users/[^/]+/Library/CloudStorage(/|$)",
+    "^/Users/[^/]+/Library/Mobile Documents(/|$)",
+    "^/Users/[^/]+/Movies(/|$)",
+    "^/Users/[^/]+/Library/Caches(/|$)",
+    "^/Users/[^/]+/go/pkg/mod(/|$)",
+    "/node_modules/\\.cache(/|$)",
+    "^/Users/[^/]+/\\.local/share/containers(/|$)",
+    "^/Users/[^/]+/\\.orbstack(/|$)",
+    "^/Users/[^/]+/Library/Group Containers/HUAQ24HBR6\\.dev\\.orbstack(/|$)",
+    "^/Users/[^/]+/Library/Containers/com\\.docker\\.docker/Data(/|$)",
+    "^/Users/[^/]+/\\.Trash(/|$)",
+    "/\\.git/objects(/|$)"
   ],
   "yara_rules": "",
   "allowlist": [],
